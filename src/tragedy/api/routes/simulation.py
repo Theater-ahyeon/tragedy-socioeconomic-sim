@@ -39,6 +39,7 @@ async def start_simulation(request: SimulationStartRequest) -> dict[str, Any]:
     from tragedy.models.yard_sale import YardSaleModel
     from tragedy.core.engine import SimulationEngine
     from tragedy.metrics.collector import MetricCollector
+    from tragedy.api.websocket import get_stream
     from tragedy.utils.config import config_to_model_params, load_config, merge_configs
 
     state = get_state()
@@ -73,21 +74,29 @@ async def start_simulation(request: SimulationStartRequest) -> dict[str, Any]:
     # Create collector
     collector = MetricCollector()
 
-    # Wire collector to engine tick callback
+    # Wire up WebSocket streaming pipeline
+    stream = get_stream()
+    stream.set_collector(collector)
+    stream.start()
+
+    # Wire collector to engine tick callback → pushes snapshots to stream
     engine.on_tick(
-        lambda tick: _on_tick(tick, engine, collector, request.collect_every)
+        lambda tick: _on_tick(tick, engine, collector, request.collect_every, stream)
     )
 
-    # Start in background thread
+    # Start in background thread — save thread handle for clean shutdown
     state["engine"] = engine
     state["model"] = model
     state["collector"] = collector
+    state["stream"] = stream
     state["model_name"] = model_name
     state["start_time"] = time.time()
 
-    engine.run_async()
+    thread = engine.run_async(ticks=request.max_ticks)
+    state["thread"] = thread
 
-    logger.info("Started %s simulation (seed=%d)", model_name, seed)
+    logger.info("Started %s simulation (seed=%d, max_ticks=%s)",
+                model_name, seed, request.max_ticks)
 
     return {
         "status": "started",
@@ -208,13 +217,9 @@ def _on_tick(
     engine: Any,
     collector: Any,
     collect_every: int,
+    stream: Any = None,
 ) -> None:
-    """Tick callback: collect metrics and broadcast."""
+    """Tick callback: collect metrics and push to WebSocket stream."""
     snapshot = collector.collect(engine, collect_every)
-    if snapshot:
-        state = get_state()
-        stream = state.get("stream")
-        if stream:
-            # We can't call async from sync directly — the stream
-            # will poll the collector's latest data instead
-            pass
+    if snapshot and stream:
+        stream.set_snapshot(snapshot)

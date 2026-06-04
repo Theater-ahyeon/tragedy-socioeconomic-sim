@@ -2,7 +2,8 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import type { SimulationStatus } from "../types/api";
 import { useSimulationStore } from "../store/simulationStore";
 
-const API_BASE = "http://localhost:8000/api/v1";
+// 使用相对路径，由 Vite 代理转发到后端（避免跨域问题）
+const API_BASE = "/api/v1";
 
 export function useSimulation() {
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ export function useSimulation() {
       }
       return await res.json();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Unknown error";
+      const msg = e instanceof Error ? e.message : "未知错误";
       setError(msg);
       throw e;
     } finally {
@@ -59,8 +60,10 @@ export function useSimulation() {
     }
   }, [apiCall, setStatus]);
 
-  // Poll status every 2 seconds
+  // 每 2 秒轮询状态
   useEffect(() => {
+    // 立即获取一次
+    fetchStatus();
     pollingRef.current = setInterval(fetchStatus, 2000);
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);

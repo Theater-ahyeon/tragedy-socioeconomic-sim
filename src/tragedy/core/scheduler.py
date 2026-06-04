@@ -28,6 +28,7 @@ class SimulationStage(Enum):
     FINANCIAL_SETTLEMENT = auto()  # Interest, debt service, dividends
     TAXATION = auto()            # Government taxes & spending; monetary policy
     ACCOUNTING = auto()          # Balance sheet update; bankruptcy check; entry/exit
+    STRATEGY_ADAPTATION = auto() # Observe neighbors, imitate successful strategies
     METRICS = auto()             # Collect and record all aggregate statistics
 
 
@@ -40,9 +41,10 @@ class StageHandler(Protocol):
 # Default stage order for each model type.
 # Models can override this by providing their own stage list.
 YARD_SALE_STAGES = [
-    SimulationStage.CONSUMPTION,   # Pairwise transfer in Yard-Sale
-    SimulationStage.ACCOUNTING,    # Cleanup dead agents
-    SimulationStage.METRICS,       # Collect Gini, Lorenz
+    SimulationStage.CONSUMPTION,         # Network-based pairwise transfer
+    SimulationStage.STRATEGY_ADAPTATION, # Observe neighbors, imitate successful
+    SimulationStage.ACCOUNTING,          # Conservation check, cleanup
+    SimulationStage.METRICS,             # Collect Gini, Lorenz, network metrics
 ]
 
 SUGARSCAPE_STAGES = [

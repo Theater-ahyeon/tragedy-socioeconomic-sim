@@ -166,30 +166,20 @@ class AgentSet:
             groups[key(agent)].add(agent)
         return dict(groups)
 
-    def aggregate(self, func: Callable[[Agent], Any], initial: Any = None) -> Any:
-        """Reduce over all agents. Returns None for empty set unless initial is given."""
-        it = iter(self)
-        if initial is None:
-            try:
-                result = func(next(it))
-            except StopIteration:
-                return None
-        else:
-            result = initial
-        for agent in it:
-            result = func(agent) if initial is None else result
-            # Simpler: just accumulate
-        # Re-implement cleanly:
-        result = initial
-        first = True
+    def aggregate(self, func: Callable[[Agent], Any], initial: float = 0.0) -> float:
+        """Sum func(agent) across all agents, starting from initial.
+
+        Args:
+            func: Called on each agent, should return a numeric value.
+            initial: Starting value for accumulation.
+
+        Returns:
+            Sum of func(agent) for all agents + initial.
+        """
+        total = initial
         for agent in self:
-            if first and initial is None:
-                result = func(agent)
-                first = False
-            else:
-                # This is too generic — let's keep it simple
-                pass
-        return result
+            total += func(agent)
+        return total
 
     def map(self, func: Callable[[Agent], Any]) -> list[Any]:
         """Apply a function to every agent and return a list of results."""

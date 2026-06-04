@@ -2,7 +2,8 @@ import { useEffect, useRef, useCallback } from "react";
 import { useSimulationStore } from "../store/simulationStore";
 import type { WSMessage } from "../types/api";
 
-const WS_URL = "ws://localhost:8000/ws/simulation";
+// 使用相对路径 WebSocket，由 Vite 代理转发
+const WS_URL = `ws://${window.location.host}/ws/simulation`;
 const RECONNECT_DELAY = 2000;
 
 export function useWebSocket() {
@@ -28,13 +29,13 @@ export function useWebSocket() {
           addSnapshot(message);
         }
       } catch {
-        // Ignore parse errors
+        // 忽略解析错误
       }
     };
 
     ws.onclose = () => {
       setConnected(false);
-      // Auto-reconnect
+      // 自动重连
       reconnectTimer.current = setTimeout(connect, RECONNECT_DELAY);
     };
 

@@ -228,13 +228,18 @@ class SimulationEngine:
                 except Exception:
                     logger.exception("Error in stop callback")
 
-    def run_async(self) -> threading.Thread:
+    def run_async(self, ticks: int | None = None) -> threading.Thread:
         """Start the simulation in a background thread.
+
+        Args:
+            ticks: Maximum ticks to run (None = unlimited).
 
         Returns:
             The thread running the simulation.
         """
-        thread = threading.Thread(target=self.run, daemon=True, name="tragedy-engine")
+        thread = threading.Thread(
+            target=self.run, args=(ticks,), daemon=True, name="tragedy-engine"
+        )
         thread.start()
         return thread
 

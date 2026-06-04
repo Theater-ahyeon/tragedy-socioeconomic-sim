@@ -56,6 +56,7 @@ class MetricCollector:
         self.ticks.append(engine.tick)
 
         snapshot: dict[str, Any] = {
+            "type": "snapshot",
             "tick": engine.tick,
             "agent_count": len(agents),
             "metrics": {},

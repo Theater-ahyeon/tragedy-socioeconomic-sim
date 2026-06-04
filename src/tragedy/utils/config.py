@@ -83,4 +83,26 @@ def config_to_model_params(config: dict[str, Any]) -> dict[str, Any]:
     params["transfer_bias"] = transfer_section.get("bias", 0.0)
     params["collect_every"] = sim_section.get("collect_every", 1)
 
+    # Phase 1.5: Network interaction
+    network_section = config.get("network", {})
+    params["network_type"] = network_section.get("type", "random_global")
+    params["ws_k"] = int(network_section.get("ws_k", 4))
+    params["ws_p"] = float(network_section.get("ws_p", 0.1))
+    params["trades_per_tick"] = int(network_section.get("trades_per_tick", 1))
+
+    # Phase 1.5: Heterogeneous strategies
+    strategy_section = config.get("strategy", {})
+    params["heterogeneous_strategy"] = strategy_section.get("heterogeneous", True)
+    params["savings_rate_mean"] = float(strategy_section.get("savings_rate_mean", 0.05))
+    params["savings_rate_std"] = float(strategy_section.get("savings_rate_std", 0.02))
+    params["risk_tolerance_mean"] = float(strategy_section.get("risk_tolerance_mean", 0.0))
+    params["risk_tolerance_std"] = float(strategy_section.get("risk_tolerance_std", 0.05))
+
+    # Phase 1.5: Imitation learning
+    imitation_section = config.get("imitation", {})
+    params["imitation_enabled"] = imitation_section.get("enabled", True)
+    params["imitation_interval"] = int(imitation_section.get("interval", 20))
+    params["imitation_probability"] = float(imitation_section.get("probability", 0.3))
+    params["imitation_noise"] = float(imitation_section.get("noise", 0.01))
+
     return params

@@ -6,21 +6,20 @@ import TimeSeriesChart from "./components/TimeSeriesChart";
 import { useWebSocket } from "./hooks/useWebSocket";
 
 export default function App() {
-  // Connect WebSocket on mount
   useWebSocket();
 
   return (
     <div style={styles.layout}>
-      {/* Left Sidebar */}
+      {/* 左侧控制栏 */}
       <aside style={styles.sidebar}>
         <div style={styles.logo}>
           <h1 style={styles.logoTitle}>🏛️ Tragedy</h1>
-          <p style={styles.logoSub}>Socio-Economic Simulation</p>
+          <p style={styles.logoSub}>基于智能体的社会经济模拟</p>
         </div>
         <SimulationControl />
       </aside>
 
-      {/* Main Content */}
+      {/* 主内容区 */}
       <main style={styles.main}>
         <MetricPanel />
         <TimeSeriesChart />

@@ -1,20 +1,43 @@
 # Yard-Sale Wealth Transfer Model Configuration
 # Reference: "Statistical mechanics of money, wealth, and income"
 # (Yakovenko & Rosser, 2009); GEDI model (Tobochnik, Gould & Klein, 2025)
+#
+# Phase 1.5: Multi-agent collaboration with network-constrained trading,
+# heterogeneous strategies, agent memory, and imitation learning.
 
 model:
   name: "yard_sale"
-  description: "Pairwise random wealth transfer with multiplicative asymmetry"
+  description: "Yard-Sale with network trading, heterogeneous strategies & imitation"
   seed: 42
 
 agents:
   num_households: 1000
-  initial_wealth: 100.0        # Every agent starts with equal wealth
+  initial_wealth: 100.0
 
-transfer:
-  fraction: 0.05               # Transfer fraction of poorer agent's wealth
-  bias: 0.0                    # Bias in favor of richer agent (-1.0 to 1.0; 0 = fair coin)
-  # With bias > 0, richer agent wins more often → faster wealth condensation
+# ── Network Interaction ──────────────────────────────────────
+# type: "random_global" = classic random pairing
+# type: "watts_strogatz" = small-world network (Watts & Strogatz 1998)
+network:
+  type: "watts_strogatz"
+  ws_k: 4                      # Nearest-neighbor connections (even, >= 2)
+  ws_p: 0.1                    # Rewiring prob (0=lattice, 1=random)
+  trades_per_tick: 2           # How many neighbors each agent trades with
+
+# ── Heterogeneous Strategies ─────────────────────────────────
+strategy:
+  heterogeneous: true
+  savings_rate_mean: 0.05      # Mean fraction of wealth risked per trade
+  savings_rate_std: 0.02       # Initial diversity in savings rates
+  risk_tolerance_mean: 0.0     # Mean coin bias (0 = fair)
+  risk_tolerance_std: 0.05     # Initial diversity in risk tolerance
+
+# ── Imitation Learning ───────────────────────────────────────
+# Agents observe neighbors and copy the richest one's strategy
+imitation:
+  enabled: true
+  interval: 20                 # Imitate every N ticks
+  probability: 0.3             # 30% chance of imitation per agent
+  noise: 0.01                  # Gaussian noise on copied params (maintains diversity)
 
 simulation:
   max_ticks: 5000

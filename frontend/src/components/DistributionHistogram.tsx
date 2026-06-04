@@ -20,7 +20,7 @@ export default function DistributionHistogram() {
 
     const W = rect.width;
     const H = rect.height;
-    const pad = { top: 30, right: 16, bottom: 30, left: 50 };
+    const pad = { top: 30, right: 16, bottom: 32, left: 52 };
 
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = "#0d1117";
@@ -30,7 +30,7 @@ export default function DistributionHistogram() {
       ctx.fillStyle = "#8b949e";
       ctx.font = "13px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Waiting for data...", W / 2, H / 2);
+      ctx.fillText("等待数据...", W / 2, H / 2);
       return;
     }
 
@@ -39,14 +39,14 @@ export default function DistributionHistogram() {
     const binCount = dist.counts.length;
     const maxCount = Math.max(...dist.counts, 1);
 
-    // Bars
+    // 柱状图
     const barWidth = plotW / binCount;
     dist.counts.forEach((count, i) => {
       const barH = (count / maxCount) * plotH;
       const x = pad.left + i * barWidth;
       const y = pad.top + plotH - barH;
 
-      // Color gradient based on wealth level (darker = poorer, brighter = richer)
+      // 根据财富等级着色（暗→亮）
       const t = i / binCount;
       const r = Math.floor(80 + t * 100);
       const g = Math.floor(100 + t * 80);
@@ -55,7 +55,7 @@ export default function DistributionHistogram() {
       ctx.fillRect(x + 1, y, Math.max(barWidth - 2, 1), barH);
     });
 
-    // Axes
+    // 坐标轴
     ctx.strokeStyle = "#30363d";
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -64,22 +64,22 @@ export default function DistributionHistogram() {
     ctx.lineTo(pad.left + plotW, pad.top + plotH);
     ctx.stroke();
 
-    // Labels
+    // 轴标签
     ctx.fillStyle = "#8b949e";
     ctx.font = "10px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Wealth (log scale)", W / 2, H - 4);
+    ctx.fillText("财富（对数刻度）", W / 2, H - 6);
     ctx.save();
-    ctx.translate(10, pad.top + plotH / 2);
+    ctx.translate(12, pad.top + plotH / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillText("Agents", 0, 0);
+    ctx.fillText("智能体数量", 0, 0);
     ctx.restore();
 
-    // Title
+    // 标题
     ctx.fillStyle = "#e1e4e8";
     ctx.font = "bold 13px sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText("Wealth Distribution", pad.left, 18);
+    ctx.fillText("财富分布", pad.left, 18);
   }, [dist]);
 
   return (

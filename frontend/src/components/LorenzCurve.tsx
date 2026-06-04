@@ -21,16 +21,16 @@ export default function LorenzCurve() {
 
     const W = rect.width;
     const H = rect.height;
-    const pad = 30;
+    const pad = 36;
 
-    // Clear
+    // 清空
     ctx.clearRect(0, 0, W, H);
 
-    // Background
+    // 背景
     ctx.fillStyle = "#0d1117";
     ctx.fillRect(0, 0, W, H);
 
-    // Grid
+    // 网格
     ctx.strokeStyle = "#21262d";
     ctx.lineWidth = 1;
     for (let i = 0; i <= 5; i++) {
@@ -46,7 +46,7 @@ export default function LorenzCurve() {
       ctx.stroke();
     }
 
-    // Equality line
+    // 绝对平等线
     ctx.strokeStyle = "#30363d";
     ctx.lineWidth = 1.5;
     ctx.setLineDash([5, 5]);
@@ -56,7 +56,7 @@ export default function LorenzCurve() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Lorenz curve
+    // 洛伦兹曲线
     if (lorenz?.population && lorenz?.wealth) {
       ctx.strokeStyle = "#58a6ff";
       ctx.lineWidth = 2.5;
@@ -69,7 +69,7 @@ export default function LorenzCurve() {
       }
       ctx.stroke();
 
-      // Fill area under curve
+      // 曲线下方填充
       ctx.fillStyle = "rgba(88, 166, 255, 0.1)";
       ctx.lineTo(W - pad, H - pad);
       ctx.lineTo(pad, H - pad);
@@ -77,24 +77,24 @@ export default function LorenzCurve() {
       ctx.fill();
     }
 
-    // Labels
+    // 坐标轴标签
     ctx.fillStyle = "#8b949e";
     ctx.font = "11px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Population %", W / 2, H - 4);
+    ctx.fillText("人口累计 %", W / 2, H - 6);
     ctx.save();
     ctx.translate(10, H / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillText("Wealth %", 0, 0);
+    ctx.fillText("财富累计 %", 0, 0);
     ctx.restore();
 
-    // Title
+    // 标题
     ctx.fillStyle = "#e1e4e8";
     ctx.font = "bold 13px sans-serif";
     ctx.textAlign = "left";
     ctx.fillText(
-      `Lorenz Curve${gini !== undefined ? ` — Gini: ${gini.toFixed(4)}` : ""}`,
-      pad + 4,
+      `洛伦兹曲线${gini !== undefined ? ` — 基尼系数: ${gini.toFixed(4)}` : ""}`,
+      pad,
       20
     );
   }, [lorenz, gini]);

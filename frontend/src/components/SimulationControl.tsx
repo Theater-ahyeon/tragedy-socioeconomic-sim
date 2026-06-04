@@ -4,26 +4,28 @@ import { useWebSocket } from "../hooks/useWebSocket";
 
 export default function SimulationControl() {
   const { status, connected } = useSimulationStore();
-  const { start, pause, resume, stop, loading } = useSimulation();
+  const { start, pause, resume, stop, loading, error } = useSimulation();
   const { sendCommand } = useWebSocket();
 
   const isRunning = status?.running && !status?.paused;
   const isPaused = status?.paused;
+  const hasStatus = status !== null;
 
   const handleStart = () => start("yard_sale", 10000);
-  const handlePause = () => { pause(); sendCommand("pause"); };
-  const handleResume = () => { resume(); sendCommand("resume"); };
-  const handleStop = () => { stop(); sendCommand("stop"); };
+  // 已连接时用 WebSocket 命令（低延迟），否则 HTTP fallback
+  const handlePause = () => connected ? sendCommand("pause") : pause();
+  const handleResume = () => connected ? sendCommand("resume") : resume();
+  const handleStop = () => connected ? sendCommand("stop") : stop();
 
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h2 style={styles.title}>⚙️ Control</h2>
+        <h2 style={styles.title}>⚙️ 控制面板</h2>
         <span style={{
           ...styles.status,
-          background: connected ? "#238636" : "#da3633",
+          background: connected ? "#238636" : hasStatus ? "#9e6a03" : "#da3633",
         }}>
-          {connected ? "Connected" : "Disconnected"}
+          {connected ? "已连接" : hasStatus ? "实时断开" : "未连接"}
         </span>
       </div>
 
@@ -31,44 +33,63 @@ export default function SimulationControl() {
         <button
           onClick={handleStart}
           disabled={isRunning || loading}
-          style={{ ...styles.btn, ...styles.btnStart }}
+          style={{
+            ...styles.btn,
+            ...(isRunning || loading ? styles.btnDisabled : styles.btnStart),
+          }}
         >
-          ▶ Start
+          ▶ 启动
         </button>
         <button
           onClick={handlePause}
           disabled={!isRunning}
-          style={{ ...styles.btn, ...styles.btnPause }}
+          style={{
+            ...styles.btn,
+            ...(!isRunning ? styles.btnDisabled : styles.btnPause),
+          }}
         >
-          ⏸ Pause
+          ⏸ 暂停
         </button>
         <button
           onClick={handleResume}
           disabled={!isPaused}
-          style={{ ...styles.btn, ...styles.btnResume }}
+          style={{
+            ...styles.btn,
+            ...(!isPaused ? styles.btnDisabled : styles.btnResume),
+          }}
         >
-          ▶ Resume
+          ▶ 继续
         </button>
         <button
           onClick={handleStop}
           disabled={!status?.running}
-          style={{ ...styles.btn, ...styles.btnStop }}
+          style={{
+            ...styles.btn,
+            ...(!status?.running ? styles.btnDisabled : styles.btnStop),
+          }}
         >
-          ⏹ Stop
+          ⏹ 停止
         </button>
       </div>
 
+      {error && (
+        <div style={styles.error}>
+          ⚠️ {error}
+        </div>
+      )}
+
       {status && (
         <div style={styles.info}>
-          <InfoRow label="Tick" value={status.tick.toLocaleString()} />
-          <InfoRow label="Agents" value={status.agent_count.toLocaleString()} />
-          <InfoRow label="Speed" value={`${status.tick_rate.toFixed(0)} t/s`} />
-          <InfoRow label="Model" value={status.model_name || "yard_sale"} />
+          <InfoRow label="当前步数" value={status.tick.toLocaleString()} />
+          <InfoRow label="智能体数" value={status.agent_count.toLocaleString()} />
+          <InfoRow label="速度" value={`${status.tick_rate.toFixed(0)} t/s`} />
+          <InfoRow label="模型" value={status.model_name || "yard_sale"} />
+          <InfoRow label="运行时间" value={`${status.uptime_seconds.toFixed(0)}s`} />
         </div>
       )}
 
       {!status?.running && !loading && (
-        <p style={styles.hint}>Press ▶ Start to begin simulation</p>
+        <p style={styles.hint}>点击 ▶ 启动 开始模拟</p>
       )}
     </div>
   );
@@ -123,11 +144,25 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     color: "#c9d1d9",
     background: "#21262d",
+    transition: "opacity 0.2s",
+  },
+  btnDisabled: {
+    opacity: 0.4,
+    cursor: "not-allowed",
   },
   btnStart: { background: "#238636", borderColor: "#238636", color: "#fff" },
   btnPause: { background: "#9e6a03", borderColor: "#9e6a03", color: "#fff" },
   btnResume: { background: "#1f6feb", borderColor: "#1f6feb", color: "#fff" },
   btnStop: { background: "#da3633", borderColor: "#da3633", color: "#fff" },
+  error: {
+    background: "#490202",
+    border: "1px solid #da3633",
+    borderRadius: 6,
+    padding: "8px 12px",
+    marginBottom: 12,
+    color: "#f85149",
+    fontSize: 13,
+  },
   info: {
     display: "flex",
     flexDirection: "column",

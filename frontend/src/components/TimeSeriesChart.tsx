@@ -12,6 +12,13 @@ const METRIC_COLORS: Record<string, string> = {
   pareto_alpha: "#79c0ff",
 };
 
+const METRIC_NAMES: Record<string, string> = {
+  gini: "基尼系数",
+  top_1_pct_share: "Top 1%",
+  top_10_pct_share: "Top 10%",
+  bottom_50_pct_share: "底层 50%",
+};
+
 export default function TimeSeriesChart() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { history } = useSimulationStore();
@@ -30,7 +37,7 @@ export default function TimeSeriesChart() {
 
     const W = rect.width;
     const H = rect.height;
-    const pad = { top: 24, right: 80, bottom: 24, left: 50 };
+    const pad = { top: 24, right: 90, bottom: 28, left: 52 };
     const plotW = W - pad.left - pad.right;
     const plotH = H - pad.top - pad.bottom;
 
@@ -42,15 +49,13 @@ export default function TimeSeriesChart() {
       ctx.fillStyle = "#8b949e";
       ctx.font = "13px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Collecting data...", W / 2, H / 2);
+      ctx.fillText("收集数据中...", W / 2, H / 2);
       return;
     }
 
-    // Find the metric with the most data points
     const metrics = ["gini", "top_1_pct_share", "top_10_pct_share", "bottom_50_pct_share"];
-    const ticks = history.map((s) => s.tick);
 
-    // Grid
+    // 网格
     ctx.strokeStyle = "#21262d";
     ctx.lineWidth = 0.5;
     for (let i = 0; i <= 5; i++) {
@@ -61,7 +66,7 @@ export default function TimeSeriesChart() {
       ctx.stroke();
     }
 
-    // Draw each metric
+    // 绘制每条指标线
     metrics.forEach((metric) => {
       const points: { x: number; y: number }[] = [];
       let minVal = Infinity;
@@ -94,7 +99,7 @@ export default function TimeSeriesChart() {
       ctx.stroke();
     });
 
-    // Axes
+    // 坐标轴
     ctx.strokeStyle = "#30363d";
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -103,13 +108,13 @@ export default function TimeSeriesChart() {
     ctx.lineTo(pad.left + plotW, pad.top + plotH);
     ctx.stroke();
 
-    // Labels
+    // X 轴标签
     ctx.fillStyle = "#8b949e";
     ctx.font = "10px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Tick", W / 2, H - 4);
+    ctx.fillText("模拟步数 (tick)", W / 2, H - 6);
 
-    // Legend
+    // 图例
     ctx.textAlign = "left";
     metrics.forEach((m, i) => {
       const y = pad.top + 10 + i * 16;
@@ -117,14 +122,14 @@ export default function TimeSeriesChart() {
       ctx.fillRect(pad.left + plotW + 8, y - 5, 10, 10);
       ctx.fillStyle = "#e1e4e8";
       ctx.font = "11px sans-serif";
-      ctx.fillText(m.replace(/_/g, " "), pad.left + plotW + 22, y + 3);
+      ctx.fillText(METRIC_NAMES[m] || m, pad.left + plotW + 22, y + 3);
     });
 
-    // Title
+    // 标题
     ctx.fillStyle = "#e1e4e8";
     ctx.font = "bold 13px sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText("Time Series", pad.left, 16);
+    ctx.fillText("指标时序", pad.left, 16);
   }, [history]);
 
   return (
