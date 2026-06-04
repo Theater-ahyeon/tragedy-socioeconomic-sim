@@ -1,0 +1,21 @@
+# Yard-Sale Wealth Transfer Model Configuration
+# Reference: "Statistical mechanics of money, wealth, and income"
+# (Yakovenko & Rosser, 2009); GEDI model (Tobochnik, Gould & Klein, 2025)
+
+model:
+  name: "yard_sale"
+  description: "Pairwise random wealth transfer with multiplicative asymmetry"
+  seed: 42
+
+agents:
+  num_households: 1000
+  initial_wealth: 100.0        # Every agent starts with equal wealth
+
+transfer:
+  fraction: 0.05               # Transfer fraction of poorer agent's wealth
+  bias: 0.0                    # Bias in favor of richer agent (-1.0 to 1.0; 0 = fair coin)
+  # With bias > 0, richer agent wins more often → faster wealth condensation
+
+simulation:
+  max_ticks: 5000
+  collect_every: 10

@@ -1,0 +1,22 @@
+# Tragedy Simulation — Global Default Parameters
+
+# Random seed for reproducibility (0 = random)
+seed: 42
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "console"  # console | json
+
+# Database
+database:
+  path: "data/tragedy.db"
+
+# WebSocket streaming
+websocket:
+  frame_interval_ms: 50  # 20 FPS max streaming rate
+
+# Simulation defaults
+simulation:
+  max_ticks: 10000
+  collect_every: 1  # Collect metrics every N ticks
